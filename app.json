@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "movnn",
+    "slug": "movnn",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/images/mov.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.movnn",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Movnn needs access to your location to show nearby rides."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/movn-high-logo.png",
+        "backgroundColor": "#005DD2"
+      },
+      "package": "com.yourcompany.movnn",
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.INTERNET",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.ACCESS_BACKGROUND_LOCATION"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Movnn needs access to your location to show nearby rides."
+        }
+      ],
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "75d9e203-5290-4f3b-a517-8a805a1b8ac4"
+      }
+    }
+  }
+}
