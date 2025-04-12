@@ -78,14 +78,14 @@ const dummyData = [
   },
 ];
 
-const ListFooterComponent = () => <View style={{ height: 20 }} />;
+const ListFooterComponent = () => <View style={{ height: 16 }} />;
 
 const Recent = () => {
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <View style={styles.leftSection}>
         <View style={styles.iconContainer}>
-          <Feather name="package" size={24}  style={styles.icon} />
+          <Feather name="package" size={20} style={styles.icon} />
         </View>
         <View style={styles.textContainer}>
           <Text style={styles.title}>{item.title}</Text>
@@ -113,7 +113,7 @@ const Recent = () => {
         nestedScrollEnabled={true}
         ListFooterComponent={ListFooterComponent}
         contentInsetAdjustmentBehavior="automatic"
-        {...(Platform.OS === "ios" && { contentInset: { bottom: 80 } })}
+        {...(Platform.OS === "ios" && { contentInset: { bottom: 60 } })}
       />
     </View>
   );
@@ -123,31 +123,30 @@ export default Recent;
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 5,
-    paddingHorizontal: 16,
-    height: Platform.OS === "ios" ? 410 : 390, 
+    marginVertical: 4,
+    paddingHorizontal: 12,
+    height: Platform.OS === "ios" ? 380 : 360,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: "left",
   },
   listContent: {
-    paddingBottom: Platform.OS === "ios" ? 20 : 8, 
+    paddingBottom: Platform.OS === "ios" ? 16 : 6,
   },
   flatList: {
     flex: 1,
-    height: Platform.OS === "ios" ? 350 : 330, 
+    height: Platform.OS === "ios" ? 320 : 300,
   },
   itemContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-  
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
   },
   leftSection: {
     flexDirection: "row",
@@ -155,17 +154,17 @@ const styles = StyleSheet.create({
     flex: 3,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: "#E0EEFF",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 10,
   },
   icon: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     resizeMode: "contain",
     color: "#015cd2",
   },
@@ -173,13 +172,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 4,
+    marginBottom: 3,
   },
   description: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#666",
     fontWeight: "300",
   },
@@ -188,13 +187,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   time: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 4,
+    marginBottom: 3,
   },
   date: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#666",
     fontWeight: "300",
   },

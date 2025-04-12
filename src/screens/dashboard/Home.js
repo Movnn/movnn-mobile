@@ -1,6 +1,12 @@
 
 import React from 'react';
-import {View, StyleSheet, Platform, SafeAreaView} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Platform,
+  SafeAreaView,
+  StatusBar,
+} from "react-native";
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Header from '../../components/home/Header';
 import Promotions from '../../components/home/Promotions';
@@ -14,11 +20,12 @@ const Home = () => {
   if (Platform.OS === 'ios') {
     return (
       <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" backgroundColor="#015cd2" />
         <View style={styles.container}>
           <Header />
           <Promotions />
           <QuickAction />
-          <Recent/>
+          <Recent />
         </View>
       </SafeAreaView>
     );
@@ -35,7 +42,9 @@ const Home = () => {
           paddingLeft: insets.left,
           paddingRight: insets.right,
         },
-      ]}>
+      ]}
+    >
+      <StatusBar barStyle="dark-content" backgroundColor="#015cd2" />
       <Header />
       <Promotions />
       <QuickAction />

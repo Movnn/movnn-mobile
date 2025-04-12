@@ -485,14 +485,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     marginRight: 12,
-    alignItems: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
   },
   vehicleCardActive: {
     backgroundColor: "#005DD2",
   },
   vehicleImage: {
-    width: 50,
+    width: 85,
     height: 50,
     resizeMode: "contain",
     marginBottom: 8,
@@ -502,6 +502,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#333",
     marginBottom: 2,
+    textAlign:"left"
   },
   vehiclePrice: {
     fontSize: 14,
@@ -510,7 +511,7 @@ const styles = StyleSheet.create({
   vehicleTextActive: {
     color: "#FFFFFF",
   },
-  // Order button
+  
   orderButton: {
     backgroundColor: "#005DD2",
     borderRadius: 10,

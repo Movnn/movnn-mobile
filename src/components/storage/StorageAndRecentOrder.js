@@ -66,29 +66,28 @@ export default StorageAndRecentOrder;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: 12,
+    paddingTop: 12,
   },
   tabContainer: {
     flexDirection: "row",
-    marginBottom: 16,
+    marginBottom: 12,
     borderRadius: 8,
     backgroundColor: "#D0E5FF",
-
-    borderRadius: 50,
+    borderRadius: 40,
   },
   tabButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 9,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 50,
+    borderRadius: 40,
   },
   activeTabButton: {
     backgroundColor: "#005DD2",
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "500",
   },
   activeTabText: {

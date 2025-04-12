@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Platform,
+  StatusBar,
   Alert,
 } from "react-native";
 import React, { useState, useEffect } from "react";
@@ -17,8 +19,7 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "expo-image-picker";
-import BackButton from "../../components/common/BackButton";
-
+import CustomBackButton from "../../components/common/CustomBackButton";
 
 const StorageEstimate = () => {
   const route = useRoute();
@@ -26,7 +27,6 @@ const StorageEstimate = () => {
   const { location } = route.params || {
     location: { name: "Unknown Location" },
   };
-
 
   const [weight, setWeight] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -39,7 +39,6 @@ const StorageEstimate = () => {
   const [uploadedImages, setUploadedImages] = useState([]);
 
   useEffect(() => {
-
     (async () => {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -58,7 +57,6 @@ const StorageEstimate = () => {
 
   const handleImageUpload = async () => {
     try {
-    
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -67,9 +65,8 @@ const StorageEstimate = () => {
       });
 
       if (!result.canceled) {
-      
         const newImage = {
-          id: Date.now().toString(), 
+          id: Date.now().toString(),
           uri: result.assets[0].uri,
         };
 
@@ -80,26 +77,22 @@ const StorageEstimate = () => {
     }
   };
 
- const handleSeeEstimate = () => {
+  const handleSeeEstimate = () => {
+    const estimateData = {
+      weight,
+      quantity,
+      keepDays,
+      itemValue,
+      isInsured,
+      address: useMyDetails ? "User default address" : address,
+      phoneNumber: useMyDetails ? "User default phone" : phoneNumber,
+      location: location.name,
+      images: uploadedImages,
+      useMyDetails,
+    };
 
-   const estimateData = {
-     weight,
-     quantity,
-     keepDays,
-     itemValue,
-     isInsured,
-     address: useMyDetails ? "User default address" : address,
-     phoneNumber: useMyDetails ? "User default phone" : phoneNumber,
-     location: location.name,
-
-     images: uploadedImages,
-  
-     useMyDetails,
-   };
-
-  
-   navigation.navigate("SendStorageEstimate", { estimateData });
- };
+    navigation.navigate("SendStorageEstimate", { estimateData });
+  };
 
   const renderImageItem = ({ item }) => (
     <View style={styles.imageContainer}>
@@ -112,194 +105,192 @@ const StorageEstimate = () => {
   );
 
   const handleChange = () => {
-  
     console.log("Change location pressed");
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-
-      <View style={styles.header}>
-      
-        <BackButton containerStyle={styles.backButtonContainer} />
-
-      
-        <View style={styles.locationContainer}>
-          <View style={styles.locationBadge}>
-            <Feather
-              name="map-pin"
-              size={16}
-              color="#000"
-              style={styles.locationIcon}
-            />
-            <Text style={styles.locationText}>{location.name}</Text>
-          </View>
-        </View>
-
-     
-        <TouchableOpacity onPress={handleChange} style={styles.changeButton}>
-          <Text style={styles.changeText}>Change</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-
-        {uploadedImages.length > 0 && (
-          <View style={styles.carouselContainer}>
-            <FlatList
-              data={uploadedImages}
-              renderItem={renderImageItem}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              pagingEnabled
-              snapToAlignment="center"
-              decelerationRate="fast"
-            />
-            <Text style={styles.imageCountText}>
-              {uploadedImages.length}{" "}
-              {uploadedImages.length === 1 ? "image" : "images"} uploaded
-            </Text>
-          </View>
-        )}
-
-
-        <View style={styles.uploadSection}>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.header}>
           <TouchableOpacity
-            style={styles.uploadButton}
-            onPress={handleImageUpload}
+            style={styles.backButton}
+            onPress={handleBackPress}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             activeOpacity={0.7}
           >
-            <MaterialCommunityIcons
-              name="file-image-plus"
-              size={16}
-              color="#005DD2"
-              style={styles.locationIcon}
-            />
-            <Text style={styles.uploadText}>Upload Image of item(s)</Text>
+            <Feather name="arrow-left" size={22} color="#333333" />
+          </TouchableOpacity>
+
+          <View style={styles.locationContainer}>
+            <View style={styles.locationBadge}>
+              <Feather
+                name="map-pin"
+                size={16}
+                color="#000"
+                style={styles.locationIcon}
+              />
+              <Text style={styles.locationText}>{location.name}</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity onPress={handleChange} style={styles.changeButton}>
+            <Text style={styles.changeText}>Change</Text>
           </TouchableOpacity>
         </View>
 
-   
-        <View style={styles.inputRow}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Weight (kg)"
-              keyboardType="numeric"
-              value={weight}
-              onChangeText={setWeight}
-            />
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
+          {uploadedImages.length > 0 && (
+            <View style={styles.carouselContainer}>
+              <FlatList
+                data={uploadedImages}
+                renderItem={renderImageItem}
+                keyExtractor={(item) => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                pagingEnabled
+                snapToAlignment="center"
+                decelerationRate="fast"
+              />
+              <Text style={styles.imageCountText}>
+                {uploadedImages.length}{" "}
+                {uploadedImages.length === 1 ? "image" : "images"} uploaded
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.uploadSection}>
+            <TouchableOpacity
+              style={styles.uploadButton}
+              onPress={handleImageUpload}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="file-image-plus"
+                size={16}
+                color="#005DD2"
+                style={styles.locationIcon}
+              />
+              <Text style={styles.uploadText}>Upload Image of item(s)</Text>
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Quantity"
-              keyboardType="numeric"
-              value={quantity}
-              onChangeText={setQuantity}
-            />
-          </View>
+          <View style={styles.inputRow}>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Weight (kg)"
+                keyboardType="numeric"
+                value={weight}
+                onChangeText={setWeight}
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Keep Days"
-              keyboardType="numeric"
-              value={keepDays}
-              onChangeText={setKeepDays}
-            />
-          </View>
-        </View>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Quantity"
+                keyboardType="numeric"
+                value={quantity}
+                onChangeText={setQuantity}
+              />
+            </View>
 
-
-        <View style={styles.valueInsuranceContainer}>
-          <View style={styles.valueContainer}>
-            <TextInput
-              style={styles.valueInput}
-              placeholder="Item Value"
-              keyboardType="numeric"
-              value={itemValue}
-              onChangeText={setItemValue}
-            />
-          </View>
-
-          <View style={styles.insuranceContainer}>
-            <Text style={styles.inputLabel}>Is Item Insured?</Text>
-            <View style={styles.radioContainer}>
-              <TouchableOpacity
-                style={styles.radioOption}
-                onPress={() => setIsInsured(true)}
-              >
-                <View style={styles.radioCircle}>
-                  {isInsured && <View style={styles.radioInnerCircle} />}
-                </View>
-                <Text style={styles.radioText}>Yes</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.radioOption}
-                onPress={() => setIsInsured(false)}
-              >
-                <View style={styles.radioCircle}>
-                  {!isInsured && <View style={styles.radioInnerCircle} />}
-                </View>
-                <Text style={styles.radioText}>No</Text>
-              </TouchableOpacity>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Keep Days"
+                keyboardType="numeric"
+                value={keepDays}
+                onChangeText={setKeepDays}
+              />
             </View>
           </View>
-        </View>
 
-        <Text style={styles.sectionTitle}>Pick Up</Text>
-        {/* Use My Details Switch */}
-        <View style={styles.switchRow}>
-          <Text style={styles.switchLabel}>Use my details</Text>
-          <Switch
-            trackColor={{ false: "#E0E0E0", true: "#81b0ff" }}
-            thumbColor={useMyDetails ? "#005DD2" : "#f4f3f4"}
-            ios_backgroundColor="#E0E0E0"
-            onValueChange={() => setUseMyDetails(!useMyDetails)}
-            value={useMyDetails}
-            style={styles.switch}
-          />
-        </View>
+          <View style={styles.valueInsuranceContainer}>
+            <View style={styles.valueContainer}>
+              <TextInput
+                style={styles.valueInput}
+                placeholder="Item Value"
+                keyboardType="numeric"
+                value={itemValue}
+                onChangeText={setItemValue}
+              />
+            </View>
 
-        {/* Address and phone fields - always shown */}
-        <View style={styles.fullInputContainer}>
-          <TextInput
-            style={[styles.fullInput, useMyDetails && styles.disabledInput]}
-            placeholder="Address"
-            value={address}
-            onChangeText={setAddress}
-            editable={!useMyDetails}
-          />
-        </View>
+            <View style={styles.insuranceContainer}>
+              <Text style={styles.inputLabel}>Is Item Insured?</Text>
+              <View style={styles.radioContainer}>
+                <TouchableOpacity
+                  style={styles.radioOption}
+                  onPress={() => setIsInsured(true)}
+                >
+                  <View style={styles.radioCircle}>
+                    {isInsured && <View style={styles.radioInnerCircle} />}
+                  </View>
+                  <Text style={styles.radioText}>Yes</Text>
+                </TouchableOpacity>
 
-        <View style={styles.fullInputContainer}>
-          <TextInput
-            style={[styles.fullInput, useMyDetails && styles.disabledInput]}
-            placeholder="Phone number"
-            keyboardType="phone-pad"
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            editable={!useMyDetails}
-          />
-        </View>
-      </ScrollView>
+                <TouchableOpacity
+                  style={styles.radioOption}
+                  onPress={() => setIsInsured(false)}
+                >
+                  <View style={styles.radioCircle}>
+                    {!isInsured && <View style={styles.radioInnerCircle} />}
+                  </View>
+                  <Text style={styles.radioText}>No</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
 
-      {/* See Estimate Button */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.estimateButton}
-          onPress={handleSeeEstimate}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.estimateButtonText}>See Estimate</Text>
-        </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Pick Up</Text>
+
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Use my details</Text>
+            <Switch
+              trackColor={{ false: "#E0E0E0", true: "#81b0ff" }}
+              thumbColor={useMyDetails ? "#005DD2" : "#f4f3f4"}
+              ios_backgroundColor="#E0E0E0"
+              onValueChange={() => setUseMyDetails(!useMyDetails)}
+              value={useMyDetails}
+              style={styles.switch}
+            />
+          </View>
+
+          <View style={styles.fullInputContainer}>
+            <TextInput
+              style={[styles.fullInput, useMyDetails && styles.disabledInput]}
+              placeholder="Address"
+              value={address}
+              onChangeText={setAddress}
+              editable={!useMyDetails}
+            />
+          </View>
+
+          <View style={styles.fullInputContainer}>
+            <TextInput
+              style={[styles.fullInput, useMyDetails && styles.disabledInput]}
+              placeholder="Phone number"
+              keyboardType="phone-pad"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              editable={!useMyDetails}
+            />
+          </View>
+        </ScrollView>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.estimateButton}
+            onPress={handleSeeEstimate}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.estimateButtonText}>See Estimate</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -310,6 +301,11 @@ export default StorageEstimate;
 const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    // paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+  },
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
@@ -318,22 +314,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    // paddingTop: 50,
     paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  backButtonContainer: {
-    // No need for absolute positioning
-    width: 40, // Give it a fixed width
+    // paddingVertical: 12,
+    // borderBottomWidth: 1,
+    borderBottomColor: "#EEEEEE",
   },
   backButton: {
-    position: "absolute",
-    left: 16,
-    zIndex: 10,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 20,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+  
+    elevation: 2,
   },
   locationContainer: {
     flex: 1,
-    alignItems: "center", // Center the location badge
+    alignItems: "center",
   },
   locationBadge: {
     flexDirection: "row",
@@ -355,6 +358,7 @@ const styles = StyleSheet.create({
   },
   changeButton: {
     paddingVertical: 8,
+    paddingHorizontal: 4,
   },
   changeText: {
     fontSize: 14,
@@ -381,6 +385,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 8,
     width: "100%",
     marginBottom: 10,
@@ -523,6 +528,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     padding: 16,
+    // borderTopWidth: 1,
+    // borderTopColor: "#F0F0F0",
   },
   estimateButton: {
     height: 56,

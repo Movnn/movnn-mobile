@@ -67,22 +67,22 @@ const styles = StyleSheet.create({
   },
 
   topRotation: {
-    position: "absolute",
-    width: width * 2,
-    height: height * 0.9,
-    backgroundColor: "#1F7DF3",
-    top: -height * 0.5,
-    left: width * 0.46,
-    transform: [{ rotate: "-47.75deg" }],
+    // position: "absolute",
+    // width: width * 2,
+    // height: height * 0.9,
+    // backgroundColor: "#1F7DF3",
+    // top: -height * 0.5,
+    // left: width * 0.46,
+    // transform: [{ rotate: "-47.75deg" }],
   },
   bottomRotation: {
-    position: "absolute",
-    width: width * 2,
-    height: height * 0.8,
-    backgroundColor: "#0E63D9",
-    bottom: -height * 0.33,
-    right: -width * 0.97,
-    transform: [{ rotate: "-120.97deg" }],
+    // position: "absolute",
+    // width: width * 2,
+    // height: height * 0.8,
+    // backgroundColor: "#0E63D9",
+    // bottom: -height * 0.33,
+    // right: -width * 0.97,
+    // transform: [{ rotate: "-120.97deg" }],
   },
 
   contentContainer: {
@@ -102,8 +102,8 @@ const styles = StyleSheet.create({
   logo: {
     width: width * 0.4,
     height: undefined,
-    aspectRatio: 1, 
-    maxWidth: 200, 
+    aspectRatio: 1,
+    maxWidth: 200,
   },
   mainText: {
     fontSize: 24,

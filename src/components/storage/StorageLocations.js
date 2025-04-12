@@ -54,9 +54,7 @@ const locations = [
 const StorageLocations = () => {
   const navigation = useNavigation();
 
-
   const handleLocationPress = (location) => {
-
     navigation.navigate("StorageEstimate", { location });
   };
 
@@ -93,40 +91,40 @@ export default StorageLocations;
 const styles = StyleSheet.create({
   container: {
     marginVertical: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   listContainer: {
-    paddingRight: 16,
-    paddingVertical: 8,
-    gap: 10,
+    paddingRight: 12,
+    paddingVertical: 6,
+    gap: 8,
   },
   locationCard: {
     backgroundColor: "#D0E5FF",
-    width: 90.25,
-    height: 76,
-    borderRadius: 6,
+    width: 75,
+    height: 64,
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: "#D0E5FF",
-    padding: 18,
-    marginRight: 10,
+    padding: 12,
+    marginRight: 8,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 1,
+    elevation: 1,
   },
   locationText: {
     color: "#005DD2",
     fontWeight: "500",
-    fontSize: 14,
+    fontSize: 12,
     textAlign: "center",
   },
 });

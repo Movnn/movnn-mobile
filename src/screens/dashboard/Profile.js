@@ -72,10 +72,7 @@ const settingsItems = [
 
 const Profile = ({ navigation }) => {
   const { user, logout } = useAuth();
-
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  // console.log("user", user);
 
   const userData = user || {
     f_name: "John",
@@ -86,38 +83,30 @@ const Profile = ({ navigation }) => {
 
   const handleLogout = async () => {
     try {
-
       setIsLoggingOut(true);
-
       await logout();
-
       navigation.reset({
         index: 0,
         routes: [{ name: ROUTES.AUTH_SCREEN }],
       });
     } catch (error) {
       console.error("Logout failed:", error);
-
       setIsLoggingOut(false);
     }
   };
 
-  const handleSettingPress = (setting) => {
-    console.log(`Navigating to ${setting} settings`);
+  const handleSettingPress = (route) => {
+    navigation.navigate(route);
   };
 
   const sections = [
-    {
-      type: "header",
-      data: [{ title: "Profile" }],
-    },
     {
       type: "userInfo",
       data: [userData],
     },
     {
       type: "locationsHeader",
-      data: [{ title: "Manage Saved Locations" }],
+      data: [{ title: "Saved Locations" }],
     },
     {
       type: "locations",
@@ -142,9 +131,7 @@ const Profile = ({ navigation }) => {
       case "userInfo":
         return (
           <View style={styles.userSection}>
-            <View style={styles.userIconContainer}>
-              <UserCircleIcon size={60} color="#015cd2" />
-            </View>
+            <UserCircleIcon size={50} color="#015cd2" style={styles.userIcon} />
             <View style={styles.userInfo}>
               <Text style={styles.userName}>
                 {userData.f_name.charAt(0).toUpperCase() +
@@ -155,6 +142,12 @@ const Profile = ({ navigation }) => {
               <Text style={styles.userDetails}>{userData.phone}</Text>
               <Text style={styles.userDetails}>{userData.email}</Text>
             </View>
+            <TouchableOpacity
+              style={styles.editProfileButton}
+              onPress={() => navigation.navigate("EditProfile")}
+            >
+              <PencilIcon size={16} color="#fff" />
+            </TouchableOpacity>
           </View>
         );
 
@@ -168,18 +161,18 @@ const Profile = ({ navigation }) => {
 
       case "locations":
         return (
-          <View style={styles.locationItem}>
+          <TouchableOpacity style={styles.locationItem}>
             <View style={styles.locationIconContainer}>
-              <MapPinIcon size={20} color="#015cd2" />
+              <MapPinIcon size={16} color="#015cd2" />
             </View>
             <View style={styles.locationInfo}>
               <Text style={styles.locationName}>{item.name}</Text>
               <Text style={styles.locationAddress}>{item.location}</Text>
             </View>
             <TouchableOpacity style={styles.editButton}>
-              <PencilIcon size={16} color="#666" />
+              <PencilIcon size={14} color="#777" />
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         );
 
       case "settings":
@@ -191,11 +184,11 @@ const Profile = ({ navigation }) => {
           >
             <View style={styles.settingContent}>
               <View style={styles.settingIconContainer}>
-                <IconComponent size={20} color="#015cd2" />
+                <IconComponent size={16} color="#015cd2" />
               </View>
               <Text style={styles.settingText}>{item.title}</Text>
             </View>
-            <ChevronRightIcon size={18} color="#666" />
+            <ChevronRightIcon size={16} color="#aaa" />
           </TouchableOpacity>
         );
 
@@ -208,13 +201,9 @@ const Profile = ({ navigation }) => {
           >
             <View style={styles.logoutContent}>
               {isLoggingOut ? (
-                <ActivityIndicator
-                  size="small"
-                  color="#FF3B30"
-                  style={styles.logoutIcon}
-                />
+                <ActivityIndicator size="small" color="#FF3B30" />
               ) : (
-                <ArrowRightOnRectangleIcon size={20} color="#FF3B30" />
+                <ArrowRightOnRectangleIcon size={18} color="#FF3B30" />
               )}
               <Text style={styles.logoutText}>
                 {isLoggingOut ? "Logging out..." : "Log out"}
@@ -230,11 +219,7 @@ const Profile = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#ffffff"
-        translucent={false}
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#015cd2" />
       <SectionList
         sections={sections}
         renderItem={renderItem}
@@ -243,9 +228,8 @@ const Profile = ({ navigation }) => {
         stickySectionHeadersEnabled={false}
         contentContainerStyle={styles.sectionListContent}
         renderSectionHeader={null}
-        SectionSeparatorComponent={({ leadingItem, leadingSection }) => {
+        SectionSeparatorComponent={({ leadingSection }) => {
           if (
-            leadingSection?.type === "header" ||
             leadingSection?.type === "locationsHeader" ||
             leadingSection?.type === "settingsHeader"
           ) {
@@ -253,7 +237,7 @@ const Profile = ({ navigation }) => {
           }
           return <View style={styles.sectionSeparator} />;
         }}
-        ItemSeparatorComponent={({ leadingItem, leadingSection }) => {
+        ItemSeparatorComponent={({ leadingSection }) => {
           if (
             leadingSection?.type === "locations" ||
             leadingSection?.type === "settings"
@@ -270,80 +254,96 @@ const Profile = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#f8f9fa",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
-  headerContainer: {
+  header: {
     paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+    backgroundColor: "#fff",
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "600",
     color: "#333",
   },
   sectionListContent: {
-    // backgroundColor: "#f5f5f5",
+    paddingBottom: 20,
   },
   sectionSeparator: {
-    height: 12,
-    // backgroundColor: "#f5f5f5",
+    height: 8,
   },
   userSection: {
     flexDirection: "row",
-    marginHorizontal: 16,
-    marginBottom: 12,
+    alignItems: "center",
+    padding: 12,
+    // backgroundColor: "#fff",
+    // borderRadius: 8,
+    // marginHorizontal: 12,
+    // marginTop: 12,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.05,
+    // shadowRadius: 2,
+    // elevation: 2,
   },
-  userIconContainer: {
-    marginRight: 16,
+  userIcon: {
+    marginRight: 12,
   },
   userInfo: {
     flex: 1,
-    justifyContent: "center",
   },
   userName: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
     color: "#333",
-    marginBottom: 4,
-  },
-  userDetails: {
-    fontSize: 14,
-    color: "#666",
     marginBottom: 2,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  userDetails: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 1,
+  },
+  editProfileButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#015cd2",
+    justifyContent: "center",
     alignItems: "center",
+  },
+  sectionHeader: {
     paddingHorizontal: 16,
-    marginHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    // backgroundColor: "#f8f9fa",
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  viewAllText: {
     fontSize: 14,
-    color: "#015cd2",
-    fontWeight: "500",
+    fontWeight: "600",
+    color: "#555",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   locationItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    marginHorizontal: 16,
+    // backgroundColor: "#fff",
   },
   separator: {
     height: 1,
-    backgroundColor: "#F2F2F2",
-    marginHorizontal: 16,
+    backgroundColor: "#f0f0f0",
+    marginLeft: 16,
   },
   locationIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    // backgroundColor: "#f0f8ff",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -352,62 +352,65 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   locationName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "500",
-    color: "#546273",
+    color: "#444",
     marginBottom: 2,
   },
   locationAddress: {
-    fontSize: 13,
-    color: "#546273",
+    fontSize: 12,
+    color: "#777",
   },
   editButton: {
-    padding: 8,
+    padding: 6,
   },
   settingItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    marginHorizontal: 16,
+    // backgroundColor: "#fff",
   },
   settingContent: {
     flexDirection: "row",
     alignItems: "center",
   },
   settingIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: "#f0f8ff",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
   },
   settingText: {
-    fontSize: 15,
-    color: "#546273",
+    fontSize: 14,
+    color: "#444",
   },
   logoutButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    marginHorizontal: 16,
-    marginBottom: 20,
+    marginTop: 8,
+    marginHorizontal: 12,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   logoutContent: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
   logoutText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
     color: "#FF3B30",
-    marginLeft: 12,
-  },
-  logoutIcon: {
-    width: 20,
-    height: 20,
+    marginLeft: 8,
   },
 });
 

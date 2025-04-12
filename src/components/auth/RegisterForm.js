@@ -11,7 +11,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   ScrollView,
-  SafeAreaView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import movnn_logo from "../../assets/images/movn-high-logo.png";
@@ -27,7 +26,7 @@ import { useAuth } from "../../context/AuthProvider";
 const { width, height } = Dimensions.get("window");
 
 
-const scale = Math.min(width / 375, height / 812) * 0.95; 
+const scale = width / 375;
 const normalize = (size) => {
   const newSize = size * scale;
   return Math.round(PixelRatio.roundToNearestPixel(newSize));
@@ -47,9 +46,10 @@ const RegisterForm = (props) => {
   const { signUp, isLoading, error, setSignUpData, resetError } = useAuth();
 
 
+  const topSectionHeight = Math.min(height * 0.28, normalize(200));
+
   useEffect(() => {
     if (error) {
-   
       let errorMessage = "Failed to register. Please try again.";
 
       if (
@@ -74,13 +74,11 @@ const RegisterForm = (props) => {
   }, [error, resetError]);
 
   const handleToOtpScreen = async () => {
- 
     setFirstNameError("");
     setLastNameError("");
     setPhoneError("");
     setEmailError("");
 
-  
     let hasError = false;
 
     if (!firstName.trim()) {
@@ -110,12 +108,10 @@ const RegisterForm = (props) => {
       return;
     }
 
-    
     const formattedPhone = phoneNumber.trim().startsWith("+234")
       ? phoneNumber.trim()
       : phoneNumber.trim();
 
- 
     const userData = {
       f_name: firstName.trim(),
       l_name: lastName.trim(),
@@ -127,16 +123,12 @@ const RegisterForm = (props) => {
       signup_type: "user",
     };
 
-    // console.log("Submitting user data:", userData);
-
-  
     setSignUpData({
       ...userData,
-      phoneNumber: formattedPhone, 
+      phoneNumber: formattedPhone,
     });
 
     try {
-
       const result = await signUp(userData);
       console.log("API call completed, result:", result);
 
@@ -145,8 +137,6 @@ const RegisterForm = (props) => {
         phoneNumber: formattedPhone,
       });
     } catch (error) {
-     
-
       let errorMessage = "Registration failed. Please try again.";
 
       if (error.response) {
@@ -201,143 +191,133 @@ const RegisterForm = (props) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.keyboardAvoid}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          bounces={false}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.container}>
-         
-            <View style={styles.topRotation} />
-
-         
-            <View style={styles.logoContainer}>
-              <Image
-                source={movnn_logo}
-                style={styles.logo}
-                resizeMode="contain"
-                fadeDuration={0}
-                quality={1.0}
-              />
-            </View>
-
-            
-            <View style={styles.topSection}>
-              <Text style={styles.headerTitle}>Sign Up!</Text>
-              <Text style={styles.welcomeText}>Hello, let's get movnn! 👋🏼</Text>
-              <View style={styles.divider} />
-            </View>
-
-      
-            <View style={styles.bottomSection}>
-    
-              <View style={styles.nameRow}>
-                <View style={styles.nameField}>
-                  <InputField
-                    label="First Name"
-                    placeholder="First name"
-                    value={firstName}
-                    onChangeText={(text) => {
-                      setFirstName(text);
-                      setFirstNameError("");
-                    }}
-                    error={firstNameError}
-                  />
-                </View>
-                <View style={styles.nameField}>
-                  <InputField
-                    label="Last Name"
-                    placeholder="Last name"
-                    value={lastName}
-                    onChangeText={(text) => {
-                      setLastName(text);
-                      setLastNameError("");
-                    }}
-                    error={lastNameError}
-                  />
-                </View>
-              </View>
-
-       
-              <InputField
-                label="Phone Number"
-                placeholder="Enter your phone number"
-                value={phoneNumber}
-                onChangeText={(text) => {
-                  setPhoneNumber(text);
-                  setPhoneError("");
-                }}
-                keyboardType="phone-pad"
-                leftComponent={<Text style={styles.countryCode}>+234</Text>}
-                error={phoneError}
-              />
-
-
-              <InputField
-                label="Email"
-                placeholder="Enter your email"
-                value={email}
-                onChangeText={(text) => {
-                  setEmail(text);
-                  setEmailError("");
-                }}
-                keyboardType="email-address"
-                error={emailError}
-              />
-
- 
-              <View style={styles.orDivider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.orText}>OR</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-         
-              <ButtonIcon
-                title="Continue with Google"
-                icon={googleIcon}
-                style={styles.socialButton}
-                onPress={() => console.log("Google signup")}
-              />
-
-             
-              <View style={styles.loginContainer}>
-                <Text style={styles.loginText}>Already have an account? </Text>
-                <TouchableOpacity onPress={handleLogin}>
-                  <Text style={styles.loginLink}>Login</Text>
-                </TouchableOpacity>
-              </View>
-
-
-              <Button
-                type="primary"
-                title={isLoading ? "Processing..." : "Sign Up"}
-                style={styles.signUpButton}
-                onPress={handleToOtpScreen}
-                fullWidth
-                disabled={isLoading}
-              />
-
-
-              <View style={styles.buttonSpacer} />
-            </View>
+        {/* Blue top section with logo and welcome text */}
+        <View style={[styles.topSection, { height: topSectionHeight }]}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={movnn_logo}
+              style={styles.logo}
+              resizeMode="contain"
+              fadeDuration={0}
+            />
           </View>
-        </ScrollView>
+
+          <Text style={styles.headerTitle}>Sign Up!</Text>
+          <Text style={styles.welcomeText}>Hello, let's get movnn! 👋🏼</Text>
+          <View style={styles.divider} />
+        </View>
+
+        {/* White bottom section with form */}
+        <View
+          style={[
+            styles.bottomSection,
+            { minHeight: height - topSectionHeight },
+          ]}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            bounces={false}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.nameRow}>
+              <View style={styles.nameField}>
+                <InputField
+                  label="First Name"
+                  placeholder="First name"
+                  value={firstName}
+                  onChangeText={(text) => {
+                    setFirstName(text);
+                    setFirstNameError("");
+                  }}
+                  error={firstNameError}
+                />
+              </View>
+              <View style={styles.nameField}>
+                <InputField
+                  label="Last Name"
+                  placeholder="Last name"
+                  value={lastName}
+                  onChangeText={(text) => {
+                    setLastName(text);
+                    setLastNameError("");
+                  }}
+                  error={lastNameError}
+                />
+              </View>
+            </View>
+
+            <InputField
+              label="Phone Number"
+              placeholder="Enter your phone number"
+              value={phoneNumber}
+              onChangeText={(text) => {
+                setPhoneNumber(text);
+                setPhoneError("");
+              }}
+              keyboardType="phone-pad"
+              leftComponent={<Text style={styles.countryCode}>+234</Text>}
+              error={phoneError}
+            />
+
+            <InputField
+              label="Email"
+              placeholder="Enter your email"
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                setEmailError("");
+              }}
+              keyboardType="email-address"
+              error={emailError}
+            />
+
+            <View style={styles.orDivider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.orText}>OR</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <ButtonIcon
+              title="Continue with Google"
+              icon={googleIcon}
+              style={styles.socialButton}
+              onPress={() => console.log("Google signup")}
+            />
+
+            <View style={styles.loginContainer}>
+              <Text style={styles.loginText}>Already have an account? </Text>
+              <TouchableOpacity onPress={handleLogin}>
+                <Text style={styles.loginLink}>Login</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Button
+              type="primary"
+              title={isLoading ? "Processing..." : "Sign Up"}
+              style={styles.signUpButton}
+              onPress={handleToOtpScreen}
+              fullWidth
+              disabled={isLoading}
+            />
+
+            <View style={styles.buttonSpacer} />
+          </ScrollView>
+        </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 export default RegisterForm;
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
     backgroundColor: "#015cd2",
   },
@@ -345,81 +325,62 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
+    paddingBottom: normalize(60), // Add more padding at the bottom to ensure button visibility
   },
-  container: {
-    flex: 1,
-    backgroundColor: "#015cd2",
-    position: "relative",
-  },
-  topRotation: {
-    position: "absolute",
-    width: 627.68,
-    height: 292.03,
-    left: 199.81,
-    top: -280, 
-    backgroundColor: "#1F7DF3",
-    transform: [{ rotate: "-44.75deg" }],
-    zIndex: 1,
+  topSection: {
+    paddingHorizontal: normalize(24),
+    paddingBottom: normalize(10),
   },
   logoContainer: {
     alignItems: "center",
-    paddingTop: normalize(40), 
-    zIndex: 2,
+    paddingTop: normalize(20),
   },
   logo: {
-    width: normalize(110),
-    height: normalize(45), 
-  },
-  topSection: {
-    paddingTop: normalize(10), 
-    paddingHorizontal: normalize(24),
-    paddingBottom: normalize(10), 
-    zIndex: 2,
+    width: normalize(120),
+    height: normalize(50),
   },
   headerTitle: {
-    fontSize: normalize(26), 
+    fontSize: normalize(28),
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: normalize(3), 
+    marginBottom: normalize(6),
   },
   welcomeText: {
-    fontSize: normalize(15), 
+    fontSize: normalize(16),
     color: "#fff",
-    marginBottom: normalize(18), 
+    marginBottom: normalize(10),
   },
   divider: {
     height: 1,
     backgroundColor: "rgba(255, 255, 255, 0.3)",
-    marginTop: normalize(14), 
+    marginTop: normalize(5),
   },
   bottomSection: {
     flex: 1,
     backgroundColor: "#fff",
-    borderTopLeftRadius: normalize(25), 
-    borderTopRightRadius: normalize(25), 
-    paddingTop: normalize(35), 
-    paddingHorizontal: normalize(22), 
-    paddingBottom: normalize(15), 
-
+    borderTopLeftRadius: normalize(30),
+    borderTopRightRadius: normalize(30),
+    paddingTop: normalize(25),
+    paddingHorizontal: normalize(24),
+    paddingBottom: normalize(30),
   },
   nameRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: normalize(6), 
+    marginBottom: normalize(6),
   },
   nameField: {
     width: "48%",
   },
   countryCode: {
     color: "#333",
-    fontSize: normalize(14), 
+    fontSize: normalize(14),
     fontWeight: "500",
   },
   orDivider: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: normalize(12), 
+    marginVertical: normalize(15),
   },
   dividerLine: {
     flex: 1,
@@ -427,35 +388,34 @@ const styles = StyleSheet.create({
     backgroundColor: "#ddd",
   },
   orText: {
-    paddingHorizontal: normalize(8), 
+    paddingHorizontal: normalize(10),
     color: "#999",
-    fontSize: normalize(12), 
+    fontSize: normalize(13),
   },
   socialButton: {
-    marginBottom: normalize(20), 
+    marginBottom: normalize(15),
     borderColor: "#ddd",
-    height: normalize(50), 
+    height: normalize(45),
   },
   loginContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: normalize(12), 
-    marginBottom: normalize(12),
+    marginVertical: normalize(15),
   },
   loginText: {
     color: "#666",
-    fontSize: normalize(12), 
+    fontSize: normalize(13),
   },
   loginLink: {
     color: "#015cd2",
-    fontSize: normalize(12), 
+    fontSize: normalize(13),
     fontWeight: "bold",
   },
   signUpButton: {
-    marginBottom: normalize(5), 
-    marginTop: normalize(7), 
+    marginBottom: normalize(10),
+    marginTop: normalize(10),
   },
   buttonSpacer: {
-    height: normalize(10), 
+    height: normalize(30),
   },
 });

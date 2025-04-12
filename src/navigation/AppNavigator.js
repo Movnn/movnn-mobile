@@ -130,7 +130,13 @@ const AppNavigator = () => {
         />
 
         <Stack.Screen name={ROUTES.RATE_ORDER} component={RateOrder} />
-        <Stack.Screen name={ROUTES.STORAGE} component={Storage} />
+        <Stack.Screen
+          options={{
+            headerShown: false,
+          }}
+          name={ROUTES.STORAGE}
+          component={Storage}
+        />
         <Stack.Screen
           name={ROUTES.STORAGE_ESTIMATE}
           component={StorageEstimate}
@@ -162,10 +168,16 @@ const AppNavigator = () => {
         <Stack.Screen
           name={ROUTES.VIEW_ORDER_DETAILS}
           component={ViewOrderDetails}
+          options={{
+            headerShown: false,
+          }}
         />
         <Stack.Screen
           name={ROUTES.VIEW_STORAGE_DETAILS}
           component={ViewStorageDetails}
+          options={{
+            headerShown: false,
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

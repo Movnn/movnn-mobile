@@ -1,8 +1,8 @@
-import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
-import React from 'react';
-import {useNavigation} from '@react-navigation/native';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import React from "react";
+import { useNavigation } from "@react-navigation/native";
 
-import { ROUTES } from '../../navigation/routes';
+import { ROUTES } from "../../navigation/routes";
 
 import Octicons from "@expo/vector-icons/Octicons";
 
@@ -18,8 +18,7 @@ const QuickAction = () => {
           style={styles.actionButton}
           onPress={() => navigation.navigate(ROUTES.STORAGE)}
         >
-
-          <Octicons name="home" size={48} style={styles.actionIcon}  />
+          <Octicons name="home" size={36} style={styles.actionIcon} />
           <Text style={styles.actionText}>Storage</Text>
         </TouchableOpacity>
 
@@ -29,7 +28,7 @@ const QuickAction = () => {
         >
           <Octicons
             name="package-dependents"
-            size={48}
+            size={36}
             style={styles.actionIcon}
           />
           <Text style={styles.actionText}>New Order</Text>
@@ -43,13 +42,13 @@ export default QuickAction;
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 8,
-    paddingHorizontal: 16,
+    marginVertical: 6,
+    paddingHorizontal: 12,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: "left",
   },
   actionsRow: {
@@ -58,23 +57,21 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     width: "48%",
-    height: 120,
-    borderRadius: 12,
+    height: 90,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: "#AAD5FF",
-
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    padding: 12,
   },
   actionIcon: {
-
     color: "#015cd2",
-    marginBottom: 12,
+    marginBottom: 8,
     resizeMode: "contain",
   },
   actionText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
     color: "#333",
   },
