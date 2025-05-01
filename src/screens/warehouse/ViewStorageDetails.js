@@ -10,6 +10,7 @@ import React from "react";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import Button from "../../components/common/Button";
 import { Feather } from "@expo/vector-icons";
+import CustomBackButton from "../../components/common/CustomBackButton";
 
 const warehouse_order_item_one = {
   order_id: "WH-12345",
@@ -41,7 +42,6 @@ const warehouse_order_item_three = {
   to_be_dispatched: "(30days) 14-02-2025",
 };
 
-
 const DetailRow = ({ label, value }) => (
   <View style={styles.detailRow}>
     <Text style={styles.detailLabel}>{label}</Text>
@@ -57,12 +57,7 @@ const ViewStorageDetails = () => {
     location: "Unknown",
   };
 
-  const handleBackPress = () => {
-    navigation.goBack();
-  };
-
   const handleDispatchPress = () => {
-
     console.log("Dispatch requested");
   };
 
@@ -70,33 +65,33 @@ const ViewStorageDetails = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.headerContainer}>
-        {/* <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-          <Feather name="arrow-left" size={24} color="#333333" />
-        </TouchableOpacity> */}
-
         <View style={styles.headerTitleContainer}>
-          {/* <Text style={styles.headerTitle}>Storage Details</Text> */}
-                  <Text style={styles.warehouseId}>#{warehouse_id}</Text>
-          <View style={styles.locationBadge}>
-            <Feather
-              name="map-pin"
-              size={16}
-              color="#005DD2"
-              style={styles.locationIcon}
+          <View style={styles.idContainer}>
+            <CustomBackButton
+              containerStyle={styles.backButton}
+              iconColor="#333333"
             />
-            <Text style={styles.locationText}>{location}</Text>
+            <View style={styles.infoContainer}>
+              <Text style={styles.warehouseId}>#{warehouse_id}</Text>
+              <View style={styles.locationBadge}>
+                <Feather
+                  name="map-pin"
+                  size={14}
+                  color="#005DD2"
+                  style={styles.locationIcon}
+                />
+                <Text style={styles.locationText}>{location}</Text>
+              </View>
+            </View>
           </View>
         </View>
       </View>
-
 
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-      
         <View style={styles.cardContainer}>
-         
           <DetailRow
             label="Order ID"
             value={warehouse_order_item_one.order_id}
@@ -127,9 +122,7 @@ const ViewStorageDetails = () => {
           />
         </View>
 
-
         <View style={styles.cardContainer}>
-         
           <DetailRow
             label="Order ID"
             value={warehouse_order_item_two.order_id}
@@ -160,9 +153,7 @@ const ViewStorageDetails = () => {
           />
         </View>
 
-    
         <View style={styles.cardContainer}>
-        
           <DetailRow
             label="Order ID"
             value={warehouse_order_item_three.order_id}
@@ -194,7 +185,7 @@ const ViewStorageDetails = () => {
         </View>
       </ScrollView>
 
-      {/* Bottom Button */}
+  
       <View style={styles.buttonContainer}>
         <Button title="Add to Storage" onPress={handleDispatchPress} />
       </View>
@@ -210,92 +201,101 @@ const styles = StyleSheet.create({
     backgroundColor: "#2C3A4B12",
   },
   headerContainer: {
-    paddingTop: 60,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingTop: 48,
+    paddingHorizontal: 12,
+    paddingBottom: 12,
   },
   backButton: {
     width: 40,
     height: 40,
     justifyContent: "center",
-    alignItems: "flex-start",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 20,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+
+    elevation: 2,
   },
   headerTitleContainer: {
-    marginTop: 22,
+    marginTop: 16,
+  },
+  idContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  infoContainer: {
+    flexDirection: "column",
+    marginLeft: 12,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: "#333333",
-    marginBottom: 4,
+    marginBottom: 3,
   },
   warehouseId: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: "#666666",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   locationBadge: {
     flexDirection: "row",
     alignItems: "center",
-    alignSelf: "flex-start",
     backgroundColor: "#E0EEFF",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 50,
-    marginTop: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 40,
+    alignSelf: "flex-start",
   },
   locationIcon: {
-    marginRight: 6,
+    marginRight: 4,
   },
   locationText: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#005DD2",
     fontWeight: "500",
   },
   scrollView: {
     flex: 1,
-    padding: 16,
+    padding: 12,
   },
   cardContainer: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.05,
-    // shadowRadius: 3,
-    // elevation: 2,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
     color: "#333333",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 8,
-    // borderBottomWidth: 1,
-    // borderBottomColor: "#F0F0F0",
+    paddingVertical: 6,
   },
   detailLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#666666",
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "500",
     color: "#333333",
     textAlign: "right",
     flex: 1,
-    marginLeft: 8,
+    marginLeft: 6,
   },
   buttonContainer: {
-    paddingVertical: 26,
-    paddingHorizontal: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
   },
   dispatchButton: {
     backgroundColor: "#005DD2",

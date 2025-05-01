@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   Dimensions,
   StyleSheet,
@@ -10,20 +11,20 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  Alert,
+  Platform,
+  StatusBar,
 } from "react-native";
-import React, { useState, useEffect } from "react";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import BackButton from "../../components/common/BackButton";
 import { ROUTES } from "../../navigation/routes";
+import CustomBackButton from "../../components/common/CustomBackButton";
 
 const SendStorageEstimate = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const { width } = Dimensions.get("window");
 
-  // Extract the passed data from route params
+ 
   const { estimateData } = route.params || {};
 
 
@@ -45,10 +46,11 @@ const SendStorageEstimate = () => {
   const [location, setLocation] = useState({
     name: estimateData?.location || "Unknown Location",
   });
+  const [expandedPriceBreakdown, setExpandedPriceBreakdown] = useState(false);
 
- 
+  // Price calculation
   const calculatePrice = () => {
-    const basePrice = 500; // Example base price
+    const basePrice = 500;
     const weightFactor = parseFloat(weight) * 100 || 0;
     const daysFactor = parseFloat(keepDays) * 50 || 0;
     const quantityFactor = parseFloat(quantity) * 200 || 0;
@@ -57,48 +59,19 @@ const SendStorageEstimate = () => {
   };
 
   const [price, setPrice] = useState(calculatePrice());
-  const [expandedPriceBreakdown, setExpandedPriceBreakdown] = useState(false);
 
+ 
   useEffect(() => {
-    
     setPrice(calculatePrice());
   }, [weight, quantity, keepDays]);
 
-  const handleBackPress = () => {
-    navigation.goBack();
-  };
-
-  const renderImageItem = ({ item }) => (
-    <View style={styles.imageContainer}>
-      <Image
-        source={{ uri: item.uri }}
-        style={styles.itemImage}
-        resizeMode="cover"
-      />
-    </View>
-  );
 
   const handleChange = () => {
-  
     navigation.goBack();
   };
 
-
-
   const handleSend = () => {
-   
-    const calculatePrice = () => {
-      const basePrice = 500; // Example base price
-      const weightFactor = parseFloat(weight) * 100 || 0;
-      const daysFactor = parseFloat(keepDays) * 50 || 0;
-      const quantityFactor = parseFloat(quantity) * 200 || 0;
-
-      return basePrice + weightFactor + daysFactor + quantityFactor;
-    };
-
- 
     const calculatedPrice = calculatePrice();
-
 
     const orderData = {
       estimateData: {
@@ -116,258 +89,296 @@ const SendStorageEstimate = () => {
       },
     };
 
-  
     navigation.navigate(ROUTES.PROCESS_STORAGE_ORDER, orderData);
   };
 
+  // Render image item for carousel
+  const renderImageItem = ({ item }) => (
+    <View style={[styles.imageContainer, { width: width - 32 }]}>
+      <Image
+        source={{ uri: item.uri }}
+        style={styles.itemImage}
+        resizeMode="cover"
+      />
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
-    
-      <View style={styles.header}>
+    <View style={styles.container}>
+      <SafeAreaView style={styles.safeAreaContainer}>
+        {/* Header */}
+        <View style={styles.header}>
+          <CustomBackButton
+            containerStyle={styles.backButton}
+            iconColor="#333333"
+          />
 
-        <BackButton containerStyle={styles.backButtonContainer} />
-
-  
-        <View style={styles.locationContainer}>
-          <View style={styles.locationBadge}>
-            <Feather
-              name="map-pin"
-              size={16}
-              color="#000"
-              style={styles.locationIcon}
-            />
-            <Text style={styles.locationText}>{location.name}</Text>
+          <View style={styles.locationContainer}>
+            <View style={styles.locationBadge}>
+              <Feather
+                name="map-pin"
+                size={16}
+                color="#000"
+                style={styles.locationIcon}
+              />
+              <Text style={styles.locationText} numberOfLines={1}>
+                {location.name}
+              </Text>
+            </View>
           </View>
+
+          <TouchableOpacity
+            onPress={handleChange}
+            style={styles.changeButton}
+            disabled={true}
+          >
+            <Text style={styles.changeText}>Change</Text>
+          </TouchableOpacity>
         </View>
 
-  
-        <TouchableOpacity
-          onPress={handleChange}
-          style={styles.changeButton}
-          disabled={true}
+   
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollViewContent}
         >
-          <Text style={styles.changeText}>Change</Text>
-        </TouchableOpacity>
-      </View>
+     
+          {uploadedImages.length > 0 && (
+            <View style={styles.carouselContainer}>
+              <FlatList
+                data={uploadedImages}
+                renderItem={renderImageItem}
+                keyExtractor={(item) => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                pagingEnabled
+                snapToAlignment="center"
+                decelerationRate="fast"
+              />
+              <Text style={styles.imageCountText}>
+                {uploadedImages.length}{" "}
+                {uploadedImages.length === 1 ? "image" : "images"} uploaded
+              </Text>
+            </View>
+          )}
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-       
-        {uploadedImages.length > 0 && (
-          <View style={styles.carouselContainer}>
-            <FlatList
-              data={uploadedImages}
-              renderItem={renderImageItem}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              pagingEnabled
-              snapToAlignment="center"
-              decelerationRate="fast"
-            />
-            <Text style={styles.imageCountText}>
-              {uploadedImages.length}{" "}
-              {uploadedImages.length === 1 ? "image" : "images"} uploaded
-            </Text>
-          </View>
-        )}
 
-       
-        <View style={styles.inputRow}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={[styles.input, styles.disabledInput]}
-              placeholder="Weight (kg)"
-              value={weight}
-              editable={false}
-            />
-          </View>
+          <View style={styles.inputRow}>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[styles.input, styles.disabledInput]}
+                placeholder="Weight (kg)"
+                value={weight}
+                editable={false}
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={[styles.input, styles.disabledInput]}
-              placeholder="Quantity"
-              value={quantity}
-              editable={false}
-            />
-          </View>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[styles.input, styles.disabledInput]}
+                placeholder="Quantity"
+                value={quantity}
+                editable={false}
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={[styles.input, styles.disabledInput]}
-              placeholder="Keep Days"
-              value={keepDays}
-              editable={false}
-            />
-          </View>
-        </View>
-
- 
-        <View style={styles.valueInsuranceContainer}>
-          <View style={styles.valueContainer}>
-            <TextInput
-              style={[styles.valueInput, styles.disabledInput]}
-              placeholder="Item Value"
-              value={itemValue}
-              editable={false}
-            />
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[styles.input, styles.disabledInput]}
+                placeholder="Keep Days"
+                value={keepDays}
+                editable={false}
+              />
+            </View>
           </View>
 
-          <View style={styles.insuranceContainer}>
-            <Text style={styles.inputLabel}>Is Item Insured?</Text>
-            <View style={styles.radioContainer}>
-              <View style={styles.radioOption}>
-                <View
-                  style={[
-                    styles.radioCircle,
-                    { borderColor: isInsured ? "#005DD2" : "#AAAAAA" },
-                  ]}
-                >
-                  {isInsured && <View style={styles.radioInnerCircle} />}
+
+          <View style={styles.valueInsuranceContainer}>
+            <View style={styles.valueContainer}>
+              <TextInput
+                style={[styles.valueInput, styles.disabledInput]}
+                placeholder="Item Value"
+                value={itemValue}
+                editable={false}
+              />
+            </View>
+
+            <View style={styles.insuranceContainer}>
+              <Text style={styles.inputLabel}>Is Item Insured?</Text>
+              <View style={styles.radioContainer}>
+                <View style={styles.radioOption}>
+                  <View
+                    style={[
+                      styles.radioCircle,
+                      { borderColor: isInsured ? "#005DD2" : "#AAAAAA" },
+                    ]}
+                  >
+                    {isInsured && <View style={styles.radioInnerCircle} />}
+                  </View>
+                  <Text style={styles.radioText}>Yes</Text>
                 </View>
-                <Text style={styles.radioText}>Yes</Text>
-              </View>
 
-              <View style={styles.radioOption}>
-                <View
-                  style={[
-                    styles.radioCircle,
-                    { borderColor: !isInsured ? "#005DD2" : "#AAAAAA" },
-                  ]}
-                >
-                  {!isInsured && <View style={styles.radioInnerCircle} />}
+                <View style={styles.radioOption}>
+                  <View
+                    style={[
+                      styles.radioCircle,
+                      { borderColor: !isInsured ? "#005DD2" : "#AAAAAA" },
+                    ]}
+                  >
+                    {!isInsured && <View style={styles.radioInnerCircle} />}
+                  </View>
+                  <Text style={styles.radioText}>No</Text>
                 </View>
-                <Text style={styles.radioText}>No</Text>
               </View>
             </View>
           </View>
-        </View>
 
-        <Text style={styles.sectionTitle}>Pick Up</Text>
+
+          <Text style={styles.sectionTitle}>Pick Up</Text>
+
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Use my details</Text>
+            <Switch
+              trackColor={{ false: "#E0E0E0", true: "#81b0ff" }}
+              thumbColor={useMyDetails ? "#005DD2" : "#f4f3f4"}
+              ios_backgroundColor="#E0E0E0"
+              value={useMyDetails}
+              disabled={true}
+              style={styles.switch}
+            />
+          </View>
+
+          <View style={styles.fullInputContainer}>
+            <TextInput
+              style={[styles.fullInput, styles.disabledInput]}
+              placeholder="Address"
+              value={address}
+              editable={false}
+            />
+          </View>
+
+          <View style={styles.fullInputContainer}>
+            <TextInput
+              style={[styles.fullInput, styles.disabledInput]}
+              placeholder="Phone number"
+              value={phoneNumber}
+              editable={false}
+            />
+          </View>
+        </ScrollView>
+
+
+        <View style={styles.footerContainer}>
+  
+          <View style={styles.tripInfoContainer}>
+            <View style={styles.tripInfo}>
+              <View style={styles.infoIconContainer}>
+                <Ionicons name="cash-outline" size={18} color="#005DD2" />
+              </View>
+              <Text style={styles.tripInfoText}>₦{price}</Text>
+            </View>
+            <View style={styles.tripInfo}>
+              <View style={styles.infoIconContainer}>
+                <Ionicons name="time-outline" size={18} color="#005DD2" />
+              </View>
+              <Text style={styles.tripInfoText}>8 mins</Text>
+            </View>
+          </View>
+
+         
+          <TouchableOpacity
+            style={styles.priceBreakdownButton}
+            onPress={() => setExpandedPriceBreakdown(!expandedPriceBreakdown)}
+          >
+            <Text style={styles.priceBreakdownText}>
+              {expandedPriceBreakdown ? "Hide" : "Show"} price breakdown
+            </Text>
+            <Ionicons
+              name={expandedPriceBreakdown ? "chevron-up" : "chevron-down"}
+              size={18}
+              color="#005DD2"
+            />
+          </TouchableOpacity>
+
+        
+          {expandedPriceBreakdown && (
+            <View style={styles.priceBreakdownContainer}>
+              <View style={styles.priceItem}>
+                <Text style={styles.priceItemLabel}>Base Fare</Text>
+                <Text style={styles.priceItemValue}>
+                  ₦{(price * 0.7).toFixed(0)}
+                </Text>
+              </View>
+              <View style={styles.priceItem}>
+                <Text style={styles.priceItemLabel}>Distance Fee</Text>
+                <Text style={styles.priceItemValue}>
+                  ₦{(price * 0.2).toFixed(0)}
+                </Text>
+              </View>
+              <View style={styles.priceItem}>
+                <Text style={styles.priceItemLabel}>Service Fee</Text>
+                <Text style={styles.priceItemValue}>
+                  ₦{(price * 0.1).toFixed(0)}
+                </Text>
+              </View>
+              <View style={styles.priceDivider} />
+              <View style={styles.priceTotal}>
+                <Text style={styles.priceTotalLabel}>Total</Text>
+                <Text style={styles.priceTotalValue}>₦{price}</Text>
+              </View>
+            </View>
+          )}
+
        
-        <View style={styles.switchRow}>
-          <Text style={styles.switchLabel}>Use my details</Text>
-          <Switch
-            trackColor={{ false: "#E0E0E0", true: "#81b0ff" }}
-            thumbColor={useMyDetails ? "#005DD2" : "#f4f3f4"}
-            ios_backgroundColor="#E0E0E0"
-            value={useMyDetails}
-            disabled={true}
-            style={styles.switch}
-          />
-        </View>
-
-
-        <View style={styles.fullInputContainer}>
-          <TextInput
-            style={[styles.fullInput, styles.disabledInput]}
-            placeholder="Address"
-            value={address}
-            editable={false}
-          />
-        </View>
-
-        <View style={styles.fullInputContainer}>
-          <TextInput
-            style={[styles.fullInput, styles.disabledInput]}
-            placeholder="Phone number"
-            value={phoneNumber}
-            editable={false}
-          />
-        </View>
-      </ScrollView>
-
-      <View style={styles.tripInfoContainer}>
-        <View style={styles.tripInfo}>
-          <View style={styles.infoIconContainer}>
-            <Ionicons name="cash-outline" size={18} color="#005DD2" />
-          </View>
-          <Text style={styles.tripInfoText}>₦{price}</Text>
-        </View>
-        <View style={styles.tripInfo}>
-          <View style={styles.infoIconContainer}>
-            <Ionicons name="time-outline" size={18} color="#005DD2" />
-          </View>
-          <Text style={styles.tripInfoText}>8 mins</Text>
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={styles.priceBreakdownButton}
-        onPress={() => setExpandedPriceBreakdown(!expandedPriceBreakdown)}
-      >
-        <Text style={styles.priceBreakdownText}>price breakdown</Text>
-        <Ionicons
-          name={expandedPriceBreakdown ? "chevron-up" : "chevron-down"}
-          size={18}
-          color="#005DD2"
-        />
-      </TouchableOpacity>
-
-
-      {expandedPriceBreakdown && (
-        <View style={styles.priceBreakdownContainer}>
-          <View style={styles.priceItem}>
-            <Text style={styles.priceItemLabel}>Base Fare</Text>
-            <Text style={styles.priceItemValue}>
-              ₦{(price * 0.7).toFixed(0)}
-            </Text>
-          </View>
-          <View style={styles.priceItem}>
-            <Text style={styles.priceItemLabel}>Distance Fee</Text>
-            <Text style={styles.priceItemValue}>
-              ₦{(price * 0.2).toFixed(0)}
-            </Text>
-          </View>
-          <View style={styles.priceItem}>
-            <Text style={styles.priceItemLabel}>Service Fee</Text>
-            <Text style={styles.priceItemValue}>
-              ₦{(price * 0.1).toFixed(0)}
-            </Text>
-          </View>
-          <View style={styles.priceDivider} />
-          <View style={styles.priceTotal}>
-            <Text style={styles.priceTotalLabel}>Total</Text>
-            <Text style={styles.priceTotalValue}>₦{price}</Text>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.sendButton}
+              onPress={handleSend}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.sendButtonText}>Send</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      )}
-
-     
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.estimateButton}
-          onPress={handleSend}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.estimateButtonText}>Send</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
-
-export default SendStorageEstimate;
-
-const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+    // paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+  },
+  safeAreaContainer: {
+    flex: 1,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    // paddingTop: 50,
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingVertical: 12,
+    // borderBottomWidth: 1,
+    // borderBottomColor: "#F5F5F5",
+    marginTop:35
   },
-  backButtonContainer: {
+  backButton: {
     width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 20,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+   
+    elevation: 2,
+    marginRight: 12,
   },
   locationContainer: {
     flex: 1,
@@ -379,21 +390,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 50,
+    maxWidth: "80%",
   },
   locationIcon: {
     marginRight: 3,
   },
   locationText: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#000",
     fontWeight: "600",
-    alignSelf: "center",
     textAlign: "center",
   },
   changeButton: {
     paddingVertical: 8,
     alignItems: "flex-end",
+    width: 60,
   },
   changeText: {
     fontSize: 14,
@@ -404,22 +415,24 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollViewContent: {
     padding: 16,
+    paddingBottom: 24,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
     color: "#333333",
-    marginTop: 6,
+    marginVertical: 12,
   },
   carouselContainer: {
     width: "100%",
-    height: 260,
+    height: 240,
     marginBottom: 20,
   },
   imageContainer: {
-    width: width - 32,
-    height: 234,
+    height: 200,
     borderRadius: 12,
     overflow: "hidden",
     marginRight: 8,
@@ -445,15 +458,16 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     color: "#666666",
+    marginBottom: 4,
   },
   input: {
     height: 48,
     backgroundColor: "#F7F8FA",
-    borderRadius: 20,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#DDDDDD",
     paddingHorizontal: 12,
-    fontSize: 16,
+    fontSize: 14,
     color: "#333333",
   },
   valueInsuranceContainer: {
@@ -467,11 +481,11 @@ const styles = StyleSheet.create({
   valueInput: {
     height: 48,
     backgroundColor: "#F5F5F5",
-    borderRadius: 20,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#DDDDDD",
     paddingHorizontal: 12,
-    fontSize: 16,
+    fontSize: 14,
     color: "#333333",
   },
   insuranceContainer: {
@@ -479,9 +493,10 @@ const styles = StyleSheet.create({
   },
   radioContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     height: 28,
     alignItems: "center",
+    marginTop: 4,
   },
   radioOption: {
     flexDirection: "row",
@@ -489,19 +504,19 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   radioCircle: {
-    height: 20,
-    width: 20,
-    borderRadius: 10,
+    height: 18,
+    width: 18,
+    borderRadius: 9,
     borderWidth: 2,
     borderColor: "#005DD2",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 8,
+    marginRight: 6,
   },
   radioInnerCircle: {
-    height: 10,
-    width: 10,
-    borderRadius: 5,
+    height: 8,
+    width: 8,
+    borderRadius: 4,
     backgroundColor: "#005DD2",
   },
   radioText: {
@@ -511,17 +526,17 @@ const styles = StyleSheet.create({
   switchRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 5,
-    marginBottom: 5,
+    marginBottom: 12,
   },
   switchLabel: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "500",
     color: "#333333",
   },
   switch: {
-    transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
-    marginLeft: 8,
+    transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }],
   },
   fullInputContainer: {
     marginBottom: 16,
@@ -529,28 +544,41 @@ const styles = StyleSheet.create({
   fullInput: {
     height: 48,
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#DDDDDD",
     paddingHorizontal: 12,
-    fontSize: 16,
+    fontSize: 14,
     color: "#333333",
   },
   disabledInput: {
     backgroundColor: "#F5F5F5",
     color: "#777777",
   },
-  buttonContainer: {
-    padding: 16,
+  footerContainer: {
+    borderTopWidth: 1,
+    borderTopColor: "#EEEEEE",
+    paddingTop: 8,
+    backgroundColor: "#FFFFFF",
   },
-  estimateButton: {
-    height: 56,
+  buttonContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    marginTop: 8,
+  },
+  sendButton: {
+    height: 52,
     backgroundColor: "#005DD2",
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  estimateButtonText: {
+  sendButtonText: {
     fontSize: 16,
     fontWeight: "700",
     color: "#FFFFFF",
@@ -558,11 +586,8 @@ const styles = StyleSheet.create({
   tripInfoContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 16,
     gap: 16,
-    borderTopWidth: 1,
-    // borderBottomWidth: 1,
-    borderColor: "#EEEEEE",
+    paddingVertical: 8,
   },
   tripInfo: {
     flexDirection: "row",
@@ -570,8 +595,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E3F0FF",
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 20,
+    borderRadius: 16,
   },
   infoIconContainer: {
     marginRight: 6,
@@ -584,19 +608,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 5,
   },
   priceBreakdownText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
-    color: "#333333",
+    color: "#005DD2",
   },
   priceBreakdownContainer: {
     backgroundColor: "#F9F9F9",
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
+    marginTop: 4,
   },
   priceItem: {
     flexDirection: "row",
@@ -632,3 +657,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
+
+export default SendStorageEstimate;

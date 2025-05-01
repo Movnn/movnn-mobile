@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import { useRoute } from "@react-navigation/native";
 import sample_watch from "../../assets/samples/sample-watch.png";
 import { Feather } from "@expo/vector-icons";
+import CustomBackButton from "../../components/common/CustomBackButton";
 
 const sample_images = [
   {
@@ -60,18 +61,15 @@ const order_item_card_three = {
 };
 
 const ViewOrderDetails = () => {
- 
   const route = useRoute();
   const { orderId, status } = route.params || {
     orderId: "00000",
     status: "unknown",
   };
 
- 
   const [extendDays, setExtendDays] = useState(
     order_item_card_three.extendDays
   );
-
 
   const getStatusStyle = (status) => {
     if (status === "in-progress") {
@@ -93,13 +91,11 @@ const ViewOrderDetails = () => {
 
   const statusStyle = getStatusStyle(status);
 
-
   const renderImageItem = ({ item }) => (
     <View style={styles.imageContainer}>
       <Image source={item.image} style={styles.itemImage} resizeMode="cover" />
     </View>
   );
-
 
   const DetailRow = ({
     label,
@@ -136,15 +132,17 @@ const ViewOrderDetails = () => {
 
   const handleExtendDaysToggle = (newValue) => {
     setExtendDays(newValue);
-
   };
 
   return (
     <View style={styles.container}>
-
       <View style={styles.headerContainer}>
         <View style={styles.orderIdContainer}>
-     
+          <CustomBackButton
+            iconColor="#333"
+            iconSize={22}
+            containerStyle={styles.backButton}
+          />
           <Text style={styles.orderId}>#{orderId}</Text>
         </View>
 
@@ -156,7 +154,7 @@ const ViewOrderDetails = () => {
         >
           <Feather
             name="package"
-            size={16}
+            size={14}
             color="#FFF"
             style={styles.statusIcon}
           />
@@ -166,7 +164,6 @@ const ViewOrderDetails = () => {
 
       <SafeAreaView style={styles.safeAreaContainer}>
         <ScrollView showsVerticalScrollIndicator={false}>
-     
           <View style={styles.carouselContainer}>
             <FlatList
               data={sample_images}
@@ -180,7 +177,6 @@ const ViewOrderDetails = () => {
             />
           </View>
 
-     
           <View style={styles.cardContainer}>
             <Text style={styles.cardTitle}>Order Details</Text>
             <DetailRow
@@ -206,7 +202,6 @@ const ViewOrderDetails = () => {
             <DetailRow label="Note" value={order_item_card_one.note} />
           </View>
 
-
           <View style={styles.cardContainer}>
             <Text style={styles.cardTitle}>Pickup Details</Text>
             <DetailRow
@@ -218,7 +213,6 @@ const ViewOrderDetails = () => {
               value={order_item_card_two.phoneNumber}
             />
           </View>
-
 
           <View style={styles.cardContainer}>
             <Text style={styles.cardTitle}>Payment Details</Text>
@@ -245,11 +239,10 @@ const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   switchContainer: {
-
-    padding: 2,
+    padding: 1,
   },
   switch: {
-    transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }], 
+    transform: [{ scaleX: 1 }, { scaleY: 1 }],
   },
   container: {
     flex: 1,
@@ -260,51 +253,68 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     flexDirection: "column",
-    padding: 16,
+    padding: 12,
   },
   orderIdContainer: {
     flexDirection: "row",
-    marginTop: 70,
+    alignItems: "center",
+    marginTop: 35,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 20,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+
+    elevation: 2,
+    marginRight: 12,
   },
   orderIdLabel: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#666666",
-    marginBottom: 4,
-    marginRight: 18,
+    marginBottom: 3,
+    marginRight: 14,
   },
   orderId: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: "#333333",
   },
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 50,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 40,
     alignSelf: "flex-start",
-    marginTop: 5,
+    marginTop: 4,
   },
   statusIcon: {
-    marginRight: 6,
+    marginRight: 4,
   },
   statusText: {
     color: "#FFFFFF",
     fontWeight: "600",
-    fontSize: 12,
+    fontSize: 11,
     textTransform: "capitalize",
   },
   carouselContainer: {
     width: "100%",
-    height: 234,
-    marginVertical: 16,
+    height: 200,
+    marginVertical: 12,
   },
   imageContainer: {
-    width: width - 24,
-    marginHorizontal: 12,
-    height: 234,
-    borderRadius: 12,
+    width: width - 20,
+    marginHorizontal: 10,
+    height: 200,
+    borderRadius: 10,
     overflow: "hidden",
   },
   itemImage: {
@@ -312,34 +322,34 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   cardContainer: {
-    margin: 16,
-    padding: 16,
+    margin: 12,
+    padding: 12,
     backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    borderRadius: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowRadius: 2,
+    elevation: 1,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
     color: "#333333",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 8,
+    paddingVertical: 6,
     alignItems: "center",
   },
   detailLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#666666",
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "500",
     color: "#333333",
   },

@@ -28,8 +28,10 @@ import {
   Feather,
 } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
 import { ROUTES } from "../../navigation/routes";
 import MapComponent from "../../components/map/MapComponent";
+import { setOrderStatus } from "../../store/slices/orderSlice";
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -46,6 +48,8 @@ const ProcessOrder = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const bottomSheetRef = useRef(null);
+  const dispatch = useDispatch();
+
 
   const {
     pickupLocation,
@@ -58,7 +62,14 @@ const ProcessOrder = () => {
     price = 2300,
   } = route.params || {};
 
-  const [orderStatus, setOrderStatus] = useState("locating");
+
+  const { currentOrder, loading, orderStatus } = useSelector(
+    (state) => state.orders
+  );
+
+  const [localOrderStatus, setLocalOrderStatus] = useState(
+    orderStatus || "locating"
+  );
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [expandedPriceBreakdown, setExpandedPriceBreakdown] = useState(false);
 
@@ -66,6 +77,12 @@ const ProcessOrder = () => {
   const snapPoints = ["40%", "70%"];
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0);
 
+
+  useEffect(() => {
+    if (localOrderStatus !== orderStatus) {
+      dispatch(setOrderStatus(localOrderStatus));
+    }
+  }, [localOrderStatus, dispatch, orderStatus]);
 
   const handleSheetChanges = useCallback((index) => {
     setCurrentSnapIndex(index);
@@ -84,22 +101,22 @@ const ProcessOrder = () => {
     []
   );
 
-  // Fix for bottom sheet hiding when interacting with map
+
   const handleMapTouchStart = () => {
     if (currentSnapIndex !== 0) {
       bottomSheetRef.current?.snapToIndex(0);
     }
   };
 
-  // Simulate loading for demo
+  // Simulate loading and order status changes for demo purposes
   useEffect(() => {
-    if (orderStatus === "locating") {
+    if (localOrderStatus === "locating") {
       const interval = setInterval(() => {
         setLoadingProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
             // Move to driver on the way after loading completes
-            setTimeout(() => setOrderStatus("onWay"), 500);
+            setTimeout(() => setLocalOrderStatus("onWay"), 500);
             return 100;
           }
           return prev + 5;
@@ -110,25 +127,25 @@ const ProcessOrder = () => {
     }
 
     // For demo: automatically move to arrived status after 10 seconds
-    if (orderStatus === "onWay") {
+    if (localOrderStatus === "onWay") {
       const timeout = setTimeout(() => {
-        setOrderStatus("arrived");
+        setLocalOrderStatus("arrived");
       }, 10000);
 
       return () => clearTimeout(timeout);
     }
-  }, [orderStatus]);
+  }, [localOrderStatus]);
 
-  // Handle payment
+
   const handlePayment = () => {
     navigation.navigate(ROUTES.PROCESS_DELIVERY, {
       deliveryLocation,
       routePoints,
       price,
+      orderId: currentOrder?.id || null,
     });
   };
 
-  
   const handleCancelOrder = () => {
     Alert.alert("Cancel Order", "Are you sure you want to cancel this order?", [
       {
@@ -137,12 +154,14 @@ const ProcessOrder = () => {
       },
       {
         text: "Yes, Cancel",
-        onPress: () => navigation.goBack(),
+        onPress: () => {
+          // dispatch(cancelOrder(currentOrder?.id))
+          navigation.goBack();
+        },
       },
     ]);
   };
 
-  
   const getVehicleImage = () => {
     switch (selectedVehicle) {
       case 1:
@@ -156,10 +175,7 @@ const ProcessOrder = () => {
     }
   };
 
-
-
   const getVehicleInfo = () => {
-  
     const vehicleImage = getVehicleImage();
 
     // Get vehicle details
@@ -169,7 +185,7 @@ const ProcessOrder = () => {
     // Determine which status badge to use based on order status
     let statusBadgeStyle, statusText;
 
-    switch (orderStatus) {
+    switch (localOrderStatus) {
       case "locating":
         statusBadgeStyle = styles.statusBadge;
         statusText = "Pending";
@@ -191,7 +207,6 @@ const ProcessOrder = () => {
       <View style={styles.vehicleInfoContainer}>
         <Image source={vehicleImage} style={styles.vehicleImage} />
         <View>
-      
           {(statusText === "On-going" || statusText === "Arrived") && (
             <>
               <Text style={styles.vehicleName}>{vehicleName}</Text>
@@ -213,7 +228,7 @@ const ProcessOrder = () => {
   };
 
   const renderBottomSheetContent = () => {
-    switch (orderStatus) {
+    switch (localOrderStatus) {
       case "locating":
         return (
           <View style={styles.locatingContainer}>
@@ -316,7 +331,6 @@ const ProcessOrder = () => {
 
             {getVehicleInfo()}
 
-    
             <View style={styles.addressSection}>
               <View style={styles.addressInputContainer}>
                 <View style={styles.addressIconContainer}>
@@ -569,8 +583,16 @@ const ProcessOrder = () => {
               </View>
             )}
 
-            <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
-              <Text style={styles.payButtonText}>Pay ₦{price}</Text>
+            <TouchableOpacity
+              style={styles.payButton}
+              onPress={handlePayment}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.payButtonText}>Pay ₦{price}</Text>
+              )}
             </TouchableOpacity>
           </View>
         );
@@ -889,6 +911,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: "#333",
+    marginRight: 8,
   },
   priceBreakdownContainer: {
     backgroundColor: "#F9F9F9",

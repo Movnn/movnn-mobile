@@ -71,7 +71,7 @@ const Button = ({
   const textColor = getTextColor();
 
 
-  const defaultHeight = normalize(50);
+  const defaultHeight = normalize(38);
 
   return (
     <TouchableOpacity

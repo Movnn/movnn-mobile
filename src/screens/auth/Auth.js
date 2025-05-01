@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -17,9 +16,7 @@ const { height } = Dimensions.get("window");
 
 const Auth = () => {
   const [isLoginForm, setIsLoginForm] = useState(true);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const route = useRoute();
-
 
   useEffect(() => {
     if (route.params?.showRegister) {
@@ -27,12 +24,10 @@ const Auth = () => {
     }
   }, [route.params]);
 
-
   const toggleForm = () => {
     setIsLoginForm((prevState) => !prevState);
   };
 
-  
   const renderForm = () => {
     if (isLoginForm) {
       return <LoginForm onRegisterPress={toggleForm} />;
@@ -42,20 +37,9 @@ const Auth = () => {
   };
 
   return (
-    <SafeAreaView
-      style={styles.safeAreaContainer}
-      edges={["top"]} 
-    >
+    <SafeAreaView style={styles.safeAreaContainer} edges={["top"]}>
       <StatusBar barStyle="light-content" backgroundColor="#015cd2" />
-
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.keyboardView}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-      >
-      
-        <View style={styles.formContainer}>{renderForm()}</View>
-      </KeyboardAvoidingView>
+      <View style={styles.formContainer}>{renderForm()}</View>
     </SafeAreaView>
   );
 };
@@ -65,11 +49,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#015cd2",
   },
-  keyboardView: {
-    flex: 1,
-  },
   formContainer: {
-    flex: 1, 
+    flex: 1,
   },
 });
 

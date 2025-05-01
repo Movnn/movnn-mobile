@@ -94,7 +94,7 @@ const OrderCard = ({ item }) => {
           <View style={statusBadgeStyle}>
             <Feather
               name="package"
-              size={16}
+              size={14}
               color="#FFF"
               style={styles.statusIcon}
             />
@@ -192,12 +192,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   card: {
-    borderRadius: 30,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 24,
+    padding: 12,
+    marginBottom: 12,
     backgroundColor: "#D0E5FF",
     shadowColor: "#000",
   },
@@ -205,91 +205,91 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 50,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 40,
   },
   statusIcon: {
-    marginRight: 6,
+    marginRight: 4,
   },
   statusText: {
     color: "#FFFFFF",
     fontWeight: "600",
-    fontSize: 12,
+    fontSize: 11,
   },
   orderInfoContainer: {
     alignItems: "flex-end",
   },
   orderId: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
     color: "#333333",
-    marginLeft: 8,
+    marginLeft: 6,
   },
   time: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#666666",
-    marginTop: 4,
+    marginTop: 3,
   },
   secondRow: {
     flexDirection: "row",
-    marginBottom: 16,
-    paddingHorizontal: 8,
+    marginBottom: 12,
+    paddingHorizontal: 6,
   },
   infoItem: {
     alignItems: "center",
     paddingRight: 4,
   },
   infoValue: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
     color: "#333333",
   },
   infoLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#666666",
-    marginTop: 4,
+    marginTop: 3,
     textAlign: "center",
   },
   infoSeparator: {
     width: 1,
-    height: 24,
+    height: 20,
     backgroundColor: "#DDDDDD",
-    marginHorizontal: 8,
+    marginHorizontal: 6,
   },
   thirdRow: {
-    paddingTop: 8,
+    paddingTop: 6,
     position: "relative",
   },
   locationContainer: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   addressIconContainer: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 8,
+    marginRight: 6,
   },
   originDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: "#ffff",
     borderWidth: 3,
     borderColor: "#005DD2",
   },
   destinationDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: "#005DD24D",
     borderWidth: 2,
     borderColor: "#005DD24D",
@@ -298,20 +298,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   locationName: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
     color: "#333333",
   },
   addressText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#666666",
     marginTop: 2,
   },
   lineConnectorContainer: {
     position: "absolute",
-    left: 11.5,
-    top: 24,
-    height: 40,
+    left: 10,
+    top: 20,
+    height: 32,
     alignItems: "center",
   },
   lineConnector: {

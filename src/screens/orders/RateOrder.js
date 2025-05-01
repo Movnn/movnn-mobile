@@ -8,8 +8,11 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
 import BottomSheet, {
   BottomSheetScrollView,
   BottomSheetBackdrop,
@@ -17,13 +20,16 @@ import BottomSheet, {
 import { FontAwesome } from "@expo/vector-icons";
 import { ROUTES } from "../../navigation/routes";
 import MapComponent from "../../components/map/MapComponent";
+import orderApi from "../../api/orderApi";
+import { clearOrderProcess } from "../../store/slices/orderSlice";
 
 const RateOrder = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const dispatch = useDispatch();
   const bottomSheetRef = useRef(null);
 
-  const { driverInfo, deliveryLocation, price } = route.params || {};
+  const { driverInfo, deliveryLocation, price, orderId } = route.params || {};
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -54,18 +60,69 @@ const RateOrder = () => {
     }
   };
 
-  const handleSubmitRating = () => {
+  const handleSubmitRating = async () => {
     if (rating === 0) {
+      Alert.alert(
+        "Rating Required",
+        "Please select a rating before submitting."
+      );
       return;
     }
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
 
-      navigation.navigate(ROUTES.HOME);
-    }, 1000);
+      if (orderId) {
+        await orderApi.rateDriver(orderId, rating);
+
+   
+        dispatch(clearOrderProcess());
+
+        Alert.alert(
+          "Thank You!",
+          "Your rating has been submitted successfully.",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate(ROUTES.HOME),
+            },
+          ]
+        );
+      } else {
+        // For demo purposes
+        setTimeout(() => {
+          dispatch(clearOrderProcess());
+
+          navigation.navigate(ROUTES.HOME);
+        }, 1000);
+      }
+    } catch (error) {
+      Alert.alert(
+        "Rating Error",
+        "There was a problem submitting your rating. Please try again."
+      );
+      console.error("Rating submission error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getRatingDescription = () => {
+    switch (rating) {
+      case 1:
+        return "Poor";
+      case 2:
+        return "Fair";
+      case 3:
+        return "Good";
+      case 4:
+        return "Very Good";
+      case 5:
+        return "Excellent";
+      default:
+        return "Select your rating";
+    }
   };
 
   const renderRatingStars = () => {
@@ -122,7 +179,7 @@ const RateOrder = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.sheetContentContainer}>
-            <Text style={styles.rateTitle}>Rate Our Moover</Text>
+            <Text style={styles.rateTitle}>Rate Our Mover</Text>
 
             <View style={styles.driverInfoHeader}>
               <View style={styles.driverProfile}>
@@ -142,12 +199,7 @@ const RateOrder = () => {
             <View style={styles.ratingStarsContainer}>
               <View style={styles.starsContainer}>{renderRatingStars()}</View>
               <Text style={styles.ratingDescription}>
-                {rating === 0}
-                {rating === 1}
-                {rating === 2}
-                {rating === 3}
-                {rating === 4}
-                {rating === 5}
+                {getRatingDescription()}
               </Text>
             </View>
 
@@ -164,13 +216,34 @@ const RateOrder = () => {
             </View>
 
             <TouchableOpacity
-              style={[styles.doneButton, rating === 0 && styles.disabledButton]}
+              style={[
+                styles.doneButton,
+                (rating === 0 || isSubmitting) && styles.disabledButton,
+              ]}
               onPress={handleSubmitRating}
               disabled={rating === 0 || isSubmitting}
             >
-              <Text style={styles.doneButtonText}>
-                {isSubmitting ? "Submitting..." : "Done"}
-              </Text>
+              {isSubmitting ? (
+                <View style={styles.processingContainer}>
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <Text style={[styles.doneButtonText, { marginLeft: 10 }]}>
+                    Submitting...
+                  </Text>
+                </View>
+              ) : (
+                <Text style={styles.doneButtonText}>Done</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.skipButton}
+              onPress={() => {
+                dispatch(clearOrderProcess());
+                navigation.navigate(ROUTES.HOME);
+              }}
+              disabled={isSubmitting}
+            >
+              <Text style={styles.skipButtonText}>Skip</Text>
             </TouchableOpacity>
           </View>
         </BottomSheetScrollView>
@@ -321,5 +394,10 @@ const styles = StyleSheet.create({
   skipButtonText: {
     color: "#666",
     fontSize: 16,
+  },
+  processingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

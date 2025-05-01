@@ -1,18 +1,32 @@
+import { configureStore } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import orderReducer from "./slices/orderSlice";
 
-import {configureStore} from '@reduxjs/toolkit';
 
-
-const dummyReducer = (state = {}, action) => {
-  return state;
+const ordersPersistConfig = {
+  key: "orders",
+  storage: AsyncStorage,
+  whitelist: ["orderHistory"], 
 };
 
-export const store = configureStore({
-  reducer: {
-    dummy: dummyReducer,
 
+const persistedOrderReducer = persistReducer(ordersPersistConfig, orderReducer);
+
+
+const store = configureStore({
+  reducer: {
+    orders: persistedOrderReducer,
   },
-  middleware: getDefaultMiddleware =>
+  middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+      },
     }),
 });
+
+
+export const persistor = persistStore(store);
+
+export default store;

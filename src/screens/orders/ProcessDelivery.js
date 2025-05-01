@@ -19,9 +19,12 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { Ionicons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
 import { ROUTES } from "../../navigation/routes";
 import userimg from "../../assets/images/user-img.png";
 import MapComponent from "../../components/map/MapComponent";
+import orderApi from "../../api/orderApi";
+import { setOrderStatus } from "../../store/slices/orderSlice";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -35,10 +38,18 @@ const ProcessDelivery = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
+  const dispatch = useDispatch();
   const bottomSheetRef = useRef(null);
   const flatListRef = useRef(null);
 
-  const { deliveryLocation, routePoints, price = 2300 } = route.params || {};
+
+  const {
+    deliveryLocation,
+    routePoints,
+    price = 2300,
+    orderId,
+  } = route.params || {};
+  const { currentOrder } = useSelector((state) => state.orders);
 
   const [paymentMethod, setPaymentMethod] = useState("wallet");
   const [uploadedImages, setUploadedImages] = useState([]);
@@ -47,6 +58,7 @@ const ProcessDelivery = () => {
 
   const snapPoints = ["40%", "85%"];
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0);
+
 
   const galleryData = React.useMemo(() => {
     const data = [...uploadedImages];
@@ -76,6 +88,7 @@ const ProcessDelivery = () => {
     }
   };
 
+  // Auto-scroll to the last uploaded image
   useEffect(() => {
     if (uploadedImages.length > 0 && flatListRef.current) {
       try {
@@ -119,6 +132,7 @@ const ProcessDelivery = () => {
     itemVisiblePercentThreshold: 50,
   };
 
+ 
   const handleUploadImage = async () => {
     Alert.alert(
       "Select Image Source",
@@ -199,7 +213,8 @@ const ProcessDelivery = () => {
     );
   };
 
-  const handleConfirmPayment = () => {
+
+  const handleConfirmPayment = async () => {
     if (uploadedImages.length === 0) {
       Alert.alert(
         "Evidence Required",
@@ -211,26 +226,83 @@ const ProcessDelivery = () => {
 
     setIsProcessing(true);
 
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      // If we have an orderId, make the API call to pay for the order
+      if (orderId || currentOrder?.id) {
+        const targetOrderId = orderId || currentOrder.id;
 
-      Alert.alert(
-        "Payment Successful",
-        "Your payment of ₦" + price + " has been processed successfully.",
-        [
-          {
-            text: "Rate Order",
-            onPress: () => {
-              navigation.navigate(ROUTES.RATE_ORDER, {
-                driverInfo: driverInfo,
-                deliveryLocation: deliveryLocation,
-                price: price,
-              });
+        // Prepare formData for image uploads (in a real app)
+        // const formData = new FormData();
+        // uploadedImages.forEach((image, index) => {
+        //   formData.append(`images[${index}]`, {
+        //     uri: image.uri,
+        //     type: 'image/jpeg',
+        //     name: `delivery_evidence_${index}.jpg`,
+        //   });
+        // });
+
+        // Make API call to pay for the order
+        // In a real app, you would upload the images
+        // await orderApi.payOrder(targetOrderId, {
+        //   payment_method: paymentMethod,
+        //   images: formData,
+        // });
+
+        // For demo, we'll simulate the API call
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Update order status
+        dispatch(setOrderStatus("completed"));
+
+        // Show success message and navigate to rate order screen
+        Alert.alert(
+          "Payment Successful",
+          "Your payment of ₦" + price + " has been processed successfully.",
+          [
+            {
+              text: "Rate Order",
+              onPress: () => {
+                navigation.navigate(ROUTES.RATE_ORDER, {
+                  driverInfo: driverInfo,
+                  deliveryLocation: deliveryLocation,
+                  price: price,
+                  orderId: targetOrderId,
+                });
+              },
             },
-          },
-        ]
+          ]
+        );
+      } else {
+
+        setTimeout(() => {
+          Alert.alert(
+            "Payment Successful",
+            "Your payment of ₦" + price + " has been processed successfully.",
+            [
+              {
+                text: "Rate Order",
+                onPress: () => {
+                  navigation.navigate(ROUTES.RATE_ORDER, {
+                    driverInfo: driverInfo,
+                    deliveryLocation: deliveryLocation,
+                    price: price,
+                  });
+                },
+              },
+            ]
+          );
+        }, 1000);
+      }
+    } catch (error) {
+      Alert.alert(
+        "Payment Failed",
+        "There was an error processing your payment. Please try again.",
+        [{ text: "OK" }]
       );
-    }, 1000);
+      console.error("Payment error:", error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleRemoveImage = (index) => {
@@ -785,7 +857,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 10,
     marginBottom: 10,
-    // backgroundColor: "#F9F9F9",
   },
   paymentOptionSelected: {
     backgroundColor: "#E3F0FF",

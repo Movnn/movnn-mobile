@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Platform } from "react-native";
+import { View, Text, StyleSheet, Platform, StatusBar } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import StorageHeader from "../../components/storage/StorageHeader";
 import StorageLocations from "../../components/storage/StorageLocations";
@@ -13,6 +13,7 @@ const Storage = () => {
   if (Platform.OS === "ios") {
     return (
       <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" backgroundColor="#015cd2" />
         <View style={styles.container}>
           <StorageHeader />
           <StorageLocations />
@@ -34,6 +35,7 @@ const Storage = () => {
         },
       ]}
     >
+      <StatusBar barStyle="dark-content" backgroundColor="#015cd2" />
       <StorageHeader />
       <StorageLocations />
       <StorageAndRecentOrder />

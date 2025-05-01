@@ -58,12 +58,12 @@ const MyStorage = () => {
     <TouchableOpacity
       key={item.id}
       style={styles.itemContainer}
-      onPress={() => handleOrderPress(item)} 
+      onPress={() => handleOrderPress(item)}
       activeOpacity={0.7}
     >
       <View style={styles.leftSection}>
         <View style={styles.iconContainer}>
-          <Feather name="package" size={24} color="#015cd2" />
+          <Feather name="package" size={20} color="#015cd2" />
         </View>
         <View style={styles.contentContainer}>
           <Text style={styles.title}>#{item.warehouse_id}</Text>
@@ -116,47 +116,45 @@ export default MyStorage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  
-    paddingVertical: 16,
+    paddingVertical: 12,
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: 16,
   },
   itemContainer: {
     flexDirection: "row",
-    borderRadius: 12,
+    borderRadius: 10,
     backgroundColor: "#FFFFFF",
-    paddingVertical: 6,
-    marginBottom: 12,
-   
+    paddingVertical: 4,
+    marginBottom: 10,
   },
   leftSection: {
     flexDirection: "row",
     flex: 1,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#E0EEFF",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 10,
   },
   contentContainer: {
     flex: 1,
   },
   title: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 3,
   },
   labelContainer: {
     flex: 1,
@@ -166,17 +164,17 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   description: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#666",
     fontWeight: "300",
   },
   time: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "bold",
     color: "#333",
   },
   date: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#666",
     fontWeight: "300",
   },
