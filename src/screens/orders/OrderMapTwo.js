@@ -12,6 +12,7 @@ import {
   Keyboard,
   Alert,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import scooter from "../../assets/images/scooter.png";
@@ -23,8 +24,20 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
 import { ROUTES } from "../../navigation/routes";
 import MapComponent from "../../components/map/MapComponent";
+import {
+  calculatePreOrder,
+  createOrder,
+  setSelectedVehicle,
+  setOrderNotes,
+  addStop,
+  removeStop,
+  updateStop,
+} from "../../store/slices/orderSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -34,18 +47,21 @@ const vehicleList = [
     name: "Bike",
     price: 300,
     img: scooter,
+    type: "bike",
   },
   {
     id: 2,
     name: "Van",
     price: 700,
     img: van,
+    type: "van",
   },
   {
     id: 3,
     name: "Drone",
     price: 500,
     img: drone,
+    type: "drone",
   },
 ];
 
@@ -53,6 +69,7 @@ const OrderMapTwo = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const bottomSheetRef = useRef(null);
+  const dispatch = useDispatch();
 
   const {
     pickupLocation,
@@ -62,13 +79,44 @@ const OrderMapTwo = () => {
     destinationAddress,
   } = route.params || {};
 
+  const { orderProcess, loading, preOrderDetails, error } = useSelector(
+    (state) => state.orders
+  );
+
   const snapPoints = ["25%", "60%", "85%"];
   const [currentSnapIndex, setCurrentSnapIndex] = useState(1);
-
   const [stops, setStops] = useState([]);
   const [notes, setNotes] = useState("");
-  const [selectedVehicle, setSelectedVehicle] = useState(1);
+  const [selectedVehicle, setSelectedVehicleState] = useState(1);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  useEffect(() => {
+    if (pickupLocation && deliveryLocation) {
+      calculateOrderCost();
+    }
+  }, [pickupLocation, deliveryLocation, selectedVehicle]);
+
+  const calculateOrderCost = async () => {
+    if (!pickupLocation || !deliveryLocation) return;
+
+    setIsCalculating(true);
+
+    const selectedVehicleData = vehicleList.find(
+      (v) => v.id === selectedVehicle
+    );
+    const vehicleType = selectedVehicleData ? selectedVehicleData.type : "bike";
+
+    await dispatch(
+      calculatePreOrder({
+        pickupLocation,
+        deliveryLocation,
+        vehicleType,
+      })
+    );
+
+    setIsCalculating(false);
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -116,7 +164,9 @@ const OrderMapTwo = () => {
 
   const handleAddStop = () => {
     if (stops.length < 3) {
-      setStops([...stops, { id: Date.now(), address: "" }]);
+      const newStop = { id: Date.now(), address: "" };
+      setStops([...stops, newStop]);
+      dispatch(addStop(newStop));
       bottomSheetRef.current?.snapToIndex(2);
     } else {
       Alert.alert(
@@ -129,6 +179,7 @@ const OrderMapTwo = () => {
   const handleRemoveStop = (id) => {
     const updatedStops = stops.filter((stop) => stop.id !== id);
     setStops(updatedStops);
+    dispatch(removeStop(id));
   };
 
   const handleUpdateStopAddress = (id, address) => {
@@ -136,26 +187,79 @@ const OrderMapTwo = () => {
       stop.id === id ? { ...stop, address } : stop
     );
     setStops(updatedStops);
+    dispatch(updateStop({ id, address }));
   };
 
-  const handlePlaceOrder = () => {
+  const handleVehicleSelection = (vehicleId) => {
+    setSelectedVehicleState(vehicleId);
+    dispatch(setSelectedVehicle(vehicleId));
+    calculateOrderCost();
+  };
+
+  const handleNotesChange = (text) => {
+    setNotes(text);
+    dispatch(setOrderNotes(text));
+  };
+
+  const handlePlaceOrder = async () => {
+    if (loading) return;
+
+    try {
+      const userString = await AsyncStorage.getItem("user"); 
+      const userData = userString ? JSON.parse(userString) : { id: 1 };
+
+      const userId =  userData.user_uuid
+     
+      const selectedVehicleData = vehicleList.find(
+        (v) => v.id === selectedVehicle
+      );
+      const vehicleType = selectedVehicleData
+        ? selectedVehicleData.type
+        : "bike";
+
+      await dispatch(
+        createOrder({
+          userId,
+          pickupLocation,
+          deliveryLocation,
+          vehicleType,
+          notes,
+        })
+      );
+
+      if (!error) {
+        navigation.navigate(ROUTES.PROCESS_ORDER, {
+          pickupLocation,
+          deliveryLocation,
+          routePoints,
+          currentAddress,
+          destinationAddress,
+          stops,
+          selectedVehicle,
+          price: preOrderDetails?.cost || 0,
+          notes,
+          vehicleData: selectedVehicleData,
+        });
+      }
+    } catch (err) {
+      Alert.alert(
+        "Order Error",
+        "There was a problem creating your order. Please try again."
+      );
+      console.error("Order creation error:", err);
+    }
+  };
+
+  
+  const getCurrentPrice = () => {
+    if (preOrderDetails?.cost) {
+      return preOrderDetails.cost;
+    }
+
     const selectedVehicleData = vehicleList.find(
       (v) => v.id === selectedVehicle
     );
-    const price = selectedVehicleData ? selectedVehicleData.price : 0;
-
-    navigation.navigate(ROUTES.PROCESS_ORDER, {
-      pickupLocation,
-      deliveryLocation,
-      routePoints,
-      currentAddress,
-      destinationAddress,
-      stops,
-      selectedVehicle,
-      price,
-      notes,
-      vehicleData: selectedVehicleData,
-    });
+    return selectedVehicleData ? selectedVehicleData.price : 0;
   };
 
   return (
@@ -279,7 +383,7 @@ const OrderMapTwo = () => {
                 placeholderTextColor="#999"
                 multiline
                 value={notes}
-                onChangeText={setNotes}
+                onChangeText={handleNotesChange}
               />
             </View>
           </View>
@@ -295,7 +399,7 @@ const OrderMapTwo = () => {
                     styles.vehicleCard,
                     selectedVehicle === item.id && styles.vehicleCardActive,
                   ]}
-                  onPress={() => setSelectedVehicle(item.id)}
+                  onPress={() => handleVehicleSelection(item.id)}
                 >
                   <Image source={item.img} style={styles.vehicleImage} />
                   <Text
@@ -306,14 +410,16 @@ const OrderMapTwo = () => {
                   >
                     {item.name}
                   </Text>
-                  <Text
-                    style={[
-                      styles.vehiclePrice,
-                      selectedVehicle === item.id && styles.vehicleTextActive,
-                    ]}
-                  >
-                    ₦{item.price}
-                  </Text>
+                  {selectedVehicle === item.id &&
+                    (isCalculating ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <Text
+                        style={[styles.vehiclePrice, styles.vehicleTextActive]}
+                      >
+                        ₦{getCurrentPrice()}
+                      </Text>
+                    ))}
                 </TouchableOpacity>
               )}
               keyExtractor={(item) => item.id.toString()}
@@ -321,11 +427,35 @@ const OrderMapTwo = () => {
             />
           </View>
 
+          {preOrderDetails && (
+            <View style={styles.orderDetailsContainer}>
+              <View style={styles.orderDetailItem}>
+                <Text style={styles.orderDetailLabel}>Distance:</Text>
+                <Text style={styles.orderDetailValue}>
+                  {preOrderDetails.distance} km
+                </Text>
+              </View>
+              <View style={styles.orderDetailItem}>
+                <Text style={styles.orderDetailLabel}>Estimated time:</Text>
+                <Text style={styles.orderDetailValue}>
+                  {preOrderDetails.time} min
+                </Text>
+              </View>
+            </View>
+          )}
+
           <TouchableOpacity
-            style={styles.orderButton}
+            style={[styles.orderButton, loading && styles.disabledButton]}
             onPress={handlePlaceOrder}
+            disabled={loading}
           >
-            <Text style={styles.orderButtonText}>Order</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={styles.orderButtonText}>
+                Order {isCalculating ? "" : `- ₦${getCurrentPrice()}`}
+              </Text>
+            )}
           </TouchableOpacity>
         </BottomSheetScrollView>
       </BottomSheet>
@@ -485,8 +615,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     marginRight: 12,
-    // alignItems: "center",
-    // justifyContent: "center",
   },
   vehicleCardActive: {
     backgroundColor: "#005DD2",
@@ -502,7 +630,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#333",
     marginBottom: 2,
-    textAlign:"left"
+    textAlign: "left",
   },
   vehiclePrice: {
     fontSize: 14,
@@ -511,13 +639,33 @@ const styles = StyleSheet.create({
   vehicleTextActive: {
     color: "#FFFFFF",
   },
-  
+  orderDetailsContainer: {
+    backgroundColor: "#F6F6F6",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 20,
+  },
+  orderDetailItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  orderDetailLabel: {
+    color: "#666",
+  },
+  orderDetailValue: {
+    color: "#333",
+    fontWeight: "600",
+  },
   orderButton: {
     backgroundColor: "#005DD2",
     borderRadius: 10,
     paddingVertical: 16,
     alignItems: "center",
     marginVertical: 10,
+  },
+  disabledButton: {
+    backgroundColor: "#95B8E2",
   },
   orderButtonText: {
     color: "#FFFFFF",
